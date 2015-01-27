@@ -1,23 +1,10 @@
 #include "sat_ops.h"
 
-#include <stdint.h>
-
 #define MYUINT_MAX ((myuint)~0UL)
-
-/*@
-  behavior no_overflow:
-    assumes a + b <= UINT32_MAX;
-    ensures \result == a+b;
-  behavior saturate:
-    assumes a+b > UINT32_MAX;
-    ensures \result == UINT32_MAX;
-*/
-uint32_t my_add(uint32_t a, uint32_t b) {
-  uint32_t r = a + b;
-  if (r < a)
-    return UINT32_MAX;
-  return r;
-}
+#define MYUINT_MIN 0
+#define TOPBIT (MYUINT_MAX >> 1)
+#define MYSINT_MAX ((mysint)TOPBIT)
+#define MYSINT_MIN ((mysint)~TOPBIT)
 
 /** Return the value of @x + @y using saturating unsigned addition. */
 /*@
@@ -29,36 +16,62 @@ uint32_t my_add(uint32_t a, uint32_t b) {
     ensures \result == MYUINT_MAX;
 */
 myuint sat_unsigned_add(myuint x, myuint y) {
-  myuint ret = x + y;
-  if (ret < x) {
-    return MYUINT_MAX;
-  } else {
-    return ret;
-  }
+  if (x > (MYUINT_MAX - y))
+      return MYUINT_MAX;
+  return x + y;
 }
 
 /** Return the value of @x - @y using saturating unsigned subtraction. */
-/*
+/*@
+  behavior no_overflow:
+    assumes x - y >= MYUINT_MIN;
+    ensures \result == x - y;
+  behavior saturate:
+    assumes x - y < MYUINT_MIN;
+    ensures \result == MYUINT_MIN;
+*/
 myuint sat_unsigned_sub(myuint x, myuint y) {
-  myuint ret = x - y;
-  if (ret > x) {
-    return 0;
-  } else {
-    return ret;
-  }
-}
-*/
-
-/** Return the value of @x + @y using saturating signed addition. */
-/*
-mysint sat_signed_add(mysint x, mysint y) {
-  return x + y;
-}
-*/
-
-/** Return the value of @x - @y using saturating signed subtraction. */
-/*
-mysint sat_signed_sub(mysint x, mysint y) {
+  if (x < y)
+    return MYUINT_MIN;
   return x - y;
 }
+
+/** Return the value of @x + @y using saturating signed addition. */
+/*@
+  behavior no_overflow:
+    assumes x + y <= MYSINT_MAX && x + y >= MYSINT_MIN;
+    ensures \result == x + y;
+  behavior saturate_max:
+    assumes x + y > MYSINT_MAX;
+    ensures \result == MYSINT_MAX;
+  behavior saturate_min:
+    assumes x + y < MYSINT_MIN;
+    ensures \result == MYSINT_MIN;
 */
+mysint sat_signed_add(mysint x, mysint y) {
+  if (x > 0 && y > 0 && x > (MYSINT_MAX - y))
+    return MYSINT_MAX;
+  if (x < 0 && y < 0 && x < (MYSINT_MIN - y))
+    return MYSINT_MIN;
+  return x + y;
+}
+
+/** Return the value of @x - @y using saturating signed subtraction. */
+/*@
+  behavior no_overflow:
+    assumes x - y <= MYSINT_MAX && x - y >= MYSINT_MIN;
+    ensures \result == x - y;
+  behavior saturate_max:
+    assumes x - y > MYSINT_MAX;
+    ensures \result == MYSINT_MAX;
+  behavior saturate_min:
+    assumes x - y < MYSINT_MIN;
+    ensures \result == MYSINT_MIN;
+*/
+mysint sat_signed_sub(mysint x, mysint y) {
+  if (x < 0 && y > 0 && x < (MYSINT_MIN + y))
+    return MYSINT_MIN;
+  if (x >= 0 && y < 0 && x > (MYSINT_MAX + y))
+    return MYSINT_MAX;
+  return x - y;
+}
