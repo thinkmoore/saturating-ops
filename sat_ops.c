@@ -1,6 +1,6 @@
 #include "sat_ops.h"
 
-#define MYUINT_MAX ((myuint)~0UL)
+#define MYUINT_MAX ((myuint)~((myuint)0))
 #define MYUINT_MIN 0
 #define TOPBIT (MYUINT_MAX >> 1)
 #define MYSINT_MAX ((mysint)TOPBIT)

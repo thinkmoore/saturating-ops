@@ -11,7 +11,9 @@ mkdir -p verify-logs
 for i in `seq 0 4`;
 do
     echo -n "Attempting to verify ARITHTYPE ${i}... "
-    frama-c -cpp-extra-args="-DARITHTYPE=${i}" -pp-annot -rte sat_ops.c -then -wp -wp-out verify-tmp -wp-prover z3 &> "verify-logs/${i}.log"
+    frama-c -cpp-extra-args="-DARITHTYPE=${i}" -pp-annot sat_ops.c \
+	-then -wp -wp-rte -wp-out verify-tmp -wp-print -wp-prover z3 \
+	&> "verify-logs/${i}.log"
     if grep "Proved" "verify-logs/${i}.log" | awk '{print ($4 == $6 ? "yes" : "no")}' | grep "yes" &> /dev/null; then
 	echo "yes."
     else
