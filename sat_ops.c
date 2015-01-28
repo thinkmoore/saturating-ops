@@ -14,6 +14,8 @@
   behavior saturate:
     assumes x + y > MYUINT_MAX;
     ensures \result == MYUINT_MAX;
+  complete behaviors no_overflow, saturate;
+  disjoint behaviors no_overflow, saturate;
 */
 myuint sat_unsigned_add(myuint x, myuint y) {
   if (x > (MYUINT_MAX - y))
@@ -29,6 +31,8 @@ myuint sat_unsigned_add(myuint x, myuint y) {
   behavior saturate:
     assumes x - y < MYUINT_MIN;
     ensures \result == MYUINT_MIN;
+  complete behaviors no_overflow, saturate;
+  disjoint behaviors no_overflow, saturate;
 */
 myuint sat_unsigned_sub(myuint x, myuint y) {
   if (x < y)
@@ -47,6 +51,8 @@ myuint sat_unsigned_sub(myuint x, myuint y) {
   behavior saturate_min:
     assumes x + y < MYSINT_MIN;
     ensures \result == MYSINT_MIN;
+  complete behaviors no_overflow, saturate_max, saturate_min;
+  disjoint behaviors no_overflow, saturate_max, saturate_min;
 */
 mysint sat_signed_add(mysint x, mysint y) {
   if (x > 0 && y > 0 && x > (MYSINT_MAX - y))
@@ -67,6 +73,8 @@ mysint sat_signed_add(mysint x, mysint y) {
   behavior saturate_min:
     assumes x - y < MYSINT_MIN;
     ensures \result == MYSINT_MIN;
+  complete behaviors no_overflow, saturate_max, saturate_min;
+  disjoint behaviors no_overflow, saturate_max, saturate_min;
 */
 mysint sat_signed_sub(mysint x, mysint y) {
   if (x < 0 && y > 0 && x < (MYSINT_MIN + y))
